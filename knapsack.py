@@ -16,6 +16,42 @@ class Knapsack:
         """String representation of the Knapsack object."""
         return f"Knapsack(capacity={self.capacity}, items={len(self.items)})"
 
+    def pseudo_polynimial_algorithm(self, use_tqdm=False):
+        values = self.items.get_values()
+        weights = self.items.get_weights()
+        n = len(self.items)
+        P = np.sum(values)
+        A_i_p = np.full((n, (n * P) + 1), np.inf, dtype=np.float32)
+        # First row
+        A_i_p[0, values[0]] = weights[0]
+        # Recursion
+        iterator = tqdm(range(n - 1), desc="Solving Knapsack", disable=not use_tqdm)
+        for i in iterator:
+            for p in range(int((n * P) + 1)):
+                a = np.min([A_i_p[i, p], weights[i + 1] + A_i_p[i, p - values[i + 1]]])
+                if a != np.inf:
+                    A_i_p[i + 1, p] = a
+        max_val = np.argwhere(A_i_p <= self.capacity).max(axis=0)[1]
+        return max_val
+
+    def _pseudo_polynimial_algorithm(self, use_tqdm=False):
+        values = self.items.get_values()
+        weights = self.items.get_weights()
+        n = len(self.items)
+        P = np.sum(values)
+        A_i_p = np.full((n, P + 1), np.inf, dtype=np.float32)
+        # First row
+        A_i_p[0, values[0]] = weights[0]
+        # Recursion
+        iterator = tqdm(range(n - 1), desc="Solving Knapsack", disable=not use_tqdm)
+        for i in iterator:
+            for p in range(int(P + 1)):
+                a = np.min([A_i_p[i, p], weights[i + 1] + A_i_p[i, p - values[i + 1]]])
+                if a != np.inf:
+                    A_i_p[i + 1, p] = a
+        max_val = np.argwhere(A_i_p <= self.capacity).max(axis=0)[1]
+        return max_val
+
     def _solve_without_selected(self, use_tqdm=False):
         """Solves the 0/1 knapsack problem using an optimized DP approach (1D array)."""
         values = self.items.get_values()
